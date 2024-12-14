@@ -1,0 +1,36 @@
+name: Build and Release
+
+permissions:
+  contents: write  # リリースを作成
+  actions: write  # リリースを作成
+
+on:
+  workflow_call:
+    inputs:
+      version:
+        required: true
+        type: string
+
+jobs:
+  build_and_release:
+    name: Build and release
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install LLVM
+        run: choco install llvm -y
+
+      - name: Build with clang
+        shell: pwsh
+        run: |
+          New-Item -Force -ItemType directory -Path zenhan
+          $out="zenhan/zenhan.exe"
+          clang++ -std=c++14 -O2 -mwindows main.cc -o $out -limm32 -luser32 -lmsvcrt -fuse-ld=lld-link
+
+      - name: Create GitHub Release
+        run: |
+          gh release create ${{ inputs.version }} zenhan/zenhan.exe --title "Release ${{ inputs.version }}" --notes "Automated release for ${{ inputs.version }}"
+        shell: pwsh
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

@@ -1,84 +1,48 @@
 # zenhan
 
-Switch the mode of input method editor from terminal. This is a tool similar to im-select.
+A command-line tool to switch the IME (Input Method Editor) mode on Windows. Similar to [im-select](https://github.com/daipeihust/im-select).
 
-see https://github.com/VSCodeVim/Vim#input-method
+Forked from [kaz399/spzenhan.vim](https://github.com/kaz399/spzenhan.vim).
 
-## Setting example
+## Features
 
-```
-"vim.autoSwitchInputMethod.enable": true,
-"vim.autoSwitchInputMethod.defaultIM": "0",
-"vim.autoSwitchInputMethod.obtainIMCmd": "D:\\bin\\zenhan.exe",
-"vim.autoSwitchInputMethod.switchIMCmd": "D:\\bin\\zenhan.exe {im}"
-```
+- Turn on/off the IME mode programmatically from the terminal.
+- Check the current IME mode status.
 
-## see also
+## Usage
 
-[Qiita (Japanese)](https://qiita.com/iuchi/items/9ddcfb48063fc5ab626c)
+To turn on IME:
 
----
-
-# spzenhan (for neovim)
-
-'spzenhan' is slightly patched zenhan to control IME from neovim.
-
-When exiting insert mode, turn off the IME if it is on.  
-When re-enterring the insert mode, the IME state will return to the state it was in the last time.
-
-The executable binary of spzenhan is include [in this repository](./zenhan/spzenhan.exe).
-
-## Install and Setting example
-
-dein.toml
-
-```
-[[plugins]]
-repo = '~/repos/spzenhan.vim'
+```console
+zenhan.exe 1
 ```
 
-If you want to set the IME status always off when entering insert mode.
+To turn off IME:
 
-```
-let g:spzenhan#default_status = 0
-```
-
-## Usage of spzenhan.exe
-
-turn on IME
-
-```
-spzenhan 1
+```console
+zenhan.exe 0
 ```
 
+To get the current IME status:
 
-turn off IME
-
-```
-spzenhan 0
-```
-
-get current IME status (Return the IME status as exit code)
-
-```
-spzenhan
+```console
+zenhan.exe
 echo $?
 ```
 
-## Differences from original zenhan
+The exit code (0 or 1) indicates IME off or on status, respectively.
 
-* Return the IME status as exit code (0:off, 1:on -1:error)
+## Build
 
-    If spzenhan is run without arguments, the current IME status will be returned.  
-    If there is an argument, the IME status before the change will be returned.
+If you want to build from source, you can use clang++ on Windows:
 
-* The build script compiles spzenhan with clang.
-* Don't make 32-bit binary.
+```console
+clang++ -std=c++11 -O2 -mwindows main.cc -o zenhan.exe -limm32 -luser32 -lmsvcrt -fuse-ld=lld-link
+```
 
+You will need [LLVM](https://llvm.org/) installed. Or you can use Visual Studio and its build tools.  
+The tool has been tested on Windows 10/11.
 
-## Compatible mode
+## License
 
-If you give `--compat` option as 1st argument of spzenhan, spzenhan works compatibility mode.  
-In the compatibility mode, the return code of spzenhan process is always 0.  
-It will works well with VScodeVim plugin .
-
+This project is distributed under the [Unlicense](./LICENSE), as per the original repository.

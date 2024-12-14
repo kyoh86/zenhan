@@ -1,0 +1,45 @@
+name: Version Bump
+
+permissions:
+  actions: write # 別のワークフローを呼び出すために必要
+  contents: write  # タグを作成するために必要
+
+on:
+  workflow_dispatch:
+    inputs:
+      version_type:
+        description: "Which part of the version to increment? (major/minor/patch)"
+        required: true
+        default: "patch"
+
+jobs:
+  bump_version:
+    name: Bump up latest version
+    runs-on: ubuntu-latest
+    outputs:
+      vertag: ${{ steps.vertag.outputs.vertag }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # 全履歴を取得
+          tags: true
+
+      - name: Calculate new version tag
+        id: vertag
+        uses: kyoh86/git-vertag-action@v1
+        with:
+          method: ${{ github.event.inputs.version_type }}  # "major", "minor", "patch" or "get"
+          push: true
+
+      - name: Echo new version tag
+        env:
+          VERTAG: ${{ steps.vertag.outputs.vertag }}
+        run: |
+          echo "New Tag: $VERTAG"
+
+  call_release:
+    name: Call Release Workflow
+    needs: bump_version
+    uses: ./.github/workflows/release.yml
+    with:
+      version: ${{ needs.bump_version.outputs.vertag }}
